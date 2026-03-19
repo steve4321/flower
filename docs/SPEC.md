@@ -1,98 +1,154 @@
-# World of Warcraft Clone (2D Top-Down)
+# AIMMORPG - 放置挂机RPG
 
-## Project Overview
-- **Type**: Single-player RPG (WoW-inspired)
-- **Engine**: Godot 4.x
-- **Renderer**: 2D with optional shader effects
-- **Platform**: PC (Windows/macOS/Linux)
+## 1. 项目概述
 
-## Core Features
+**类型**: 放置挂机RPG，动态桌面插件风格
+**引擎**: Godot 4.x
+**平台**: Windows/Linux
+**显示**: 悬浮插件，半透明，桌面底部显示
 
-### Must Have (MVP)
-- [ ] Character creation (race/class selection)
-- [ ] Isometric 2D movement (WASD + mouse)
-- [ ] Basic combat system (auto-attack + abilities)
-- [ ] Health/Mana/Energy resource bars
-- [ ] Target selection and UI
-- [ ] Experience and leveling system
-- [ ] Basic inventory system
-- [ ] One starter zone with quests
+## 2. 核心设计
 
-### Phase 1 - RPG Mechanics
-- [ ] Character stats (Strength, Agility, Intellect, etc.)
-- [ ] Class abilities (3-5 abilities per class)
-- [ ] Talent/specialization system
-- [ ] Equipment slots (Head, Chest, Weapon, etc.)
+### 2.1 视觉风格
+- 像素风格
+- 半透明弧形底部悬浮插件
+- 桌面底部置顶显示
 
-### Phase 2 - Combat Content
-- [ ] Single-player dungeons (3-5 bosses)
-- [ ] Boss AI with phase transitions
-- [ ] Loot drops and itemization
-- [ ] Boss mechanics (tank busters, AoE, buffs)
+### 2.2 战斗系统
+- 战法牧铁三角，全AI自动战斗
+- 横版刷怪：杂兵波次 → Boss
+- 战斗速度：快速
+- 失败重试当前Boss前杂兵
 
-### Phase 3 - Economy & Social
-- [ ] Gold currency and vendors
-- [ ] Auction house (single-player version)
-- [ ] Guild system (friends list)
-- [ ] Mail system
+### 2.3 角色系统
+- 职业：战士、法师、牧师
+- 等级提升属性
+- 装备驱动成长
 
-## Technical Stack
-- **Engine**: Godot 4.2+
-- **Language**: GDScript
-- **Assets**: Placeholder sprites (kenney.nl or similar)
-- **Version Control**: Git
+### 2.4 装备系统
+- 品质：白→绿→蓝→紫→橙
+- 可为3个角色分别配置装备
 
-## Project Structure
+### 2.5 主城系统
+- 铁匠：强化装备
+- 药剂师：购买药水
+- 仓库：存放装备
+- 副本入口
+
+## 3. 副本设计
+
+### 首发副本：死亡矿井
+- Wave 1: 3只豺狼人
+- Wave 2: 4只迪菲亚
+- Wave 3: 5只矿工
+- Wave 4: Boss - 范克里夫
+- 通关奖励宝箱
+
+## 4. UI布局
+
 ```
-wow-clone/
+┌──────────────────────────────────────────────────────────────┐
+│                        桌面背景                                │
+│                                                               │
+│                                                               │
+├──────────────────────────────────────────────────────────────┤
+│  ╭──────────────────────────────────────────────────────╮   │
+│  │ 战士 ♥♥♥  法师 ♥♥♥  牧师 ♥♥♥  │ 技能条 │ [加速] │  │   │
+│  ╰──────────────────────────────────────────────────────╯   │
+└──────────────────────────────────────────────────────────────┘
+```
+
+## 5. 开发计划
+
+| 阶段 | 内容 | 优先级 |
+|-----|------|--------|
+| P0 | 角色移动、自动攻击、战斗逻辑 | 高 |
+| P0 | 敌人AI和波次系统、Boss战 | 高 |
+| P1 | 装备系统、掉落和宝箱 | 中 |
+| P1 | 主城系统 | 中 |
+| P2 | UI和视觉反馈 | 低 |
+
+## 6. 技术方案
+
+### 6.1 窗口化显示
+- Godot `--embedded` 模式
+- 自定义窗口样式：无边框、透明背景
+- 置顶显示 (always on top)
+- 弧形底部边缘通过shapes绘制
+
+### 6.2 项目结构
+```
+aimmorpg/
 ├── assets/
-│   ├── sprites/
-│   ├── tilesets/
-│   ├── fonts/
-│   └── audio/
+│   ├── sprites/          # 像素精灵
+│   ├── tilesets/         # 瓦片集
+│   ├── audio/            # 音效/音乐
+│   └── fonts/            # 像素字体
 ├── scenes/
-│   ├── characters/
-│   ├── ui/
-│   ├── world/
-│   └── combat/
+│   ├── characters/      # 角色场景
+│   │   ├── warrior.tscn
+│   │   ├── mage.tscn
+│   │   └── priest.tscn
+│   ├── enemies/          # 敌人场景
+│   │   ├── gnoll.tscn    # 豺狼人
+│   │   ├── defias.tscn   # 迪菲亚
+│   │   ├── miner.tscn    # 矿工
+│   │   └── vanCleef.tscn # Boss
+│   ├── ui/               # UI场景
+│   │   ├── plugin_window.tscn
+│   │   ├── health_bar.tscn
+│   │   └── skill_bar.tscn
+│   ├── world/            # 世界场景
+│   │   ├── dungeon.tscn  # 副本场景
+│   │   └── town.tscn     # 主城
+│   └── combat/           # 战斗系统
+│       ├── battle_manager.tscn
+│       └── wave_manager.tscn
 ├── scripts/
-│   ├── autoload/
-│   ├── classes/
-│   └── systems/
-├── docs/
-│   ├── design/
-│   ├── api/
-│   └── guides/
+│   ├── autoload/         # 全局脚本
+│   │   ├── game_state.gd
+│   │   └── config.gd
+│   ├── characters/       # 角色脚本
+│   │   ├── base_character.gd
+│   │   ├── warrior.gd
+│   │   ├── mage.gd
+│   │   └── priest.gd
+│   ├── combat/           # 战斗脚本
+│   │   ├── battle_system.gd
+│   │   ├── skill_system.gd
+│   │   └── ai_controller.gd
+│   └── ui/               # UI脚本
+│       ├── plugin_window.gd
+│       └── skill_bar.gd
 └── project.godot
 ```
 
-## Development Phases
+## 7. 角色属性
 
-### Phase 0: Setup & Prototype (1-2 weeks)
-1. Godot editor熟悉
-2. 角色移动和控制
-3. 简单的Sprite渲染
-4. 基础碰撞检测
+### 战士 (Warrior)
+- HP: 高
+- MP: 低
+- 定位: 坦克
+- 技能: 嘲讽、顺劈、雷霆一击
 
-### Phase 1: Core RPG (2-4 weeks)
-1. 角色属性系统
-2. 战斗系统
-3. 技能系统
-4. UI框架
+### 法师 (Mage)
+- HP: 低
+- MP: 高
+- 定位: 输出
+- 技能: 火球术、奥术飞弹、冰霜新星
 
-### Phase 2: Content (4-8 weeks)
-1. 地图和任务系统
-2. 副本设计
-3. 敌人AI
-4. 掉落系统
+### 牧师 (Priest)
+- HP: 中
+- MP: 中
+- 定位: 治疗
+- 技能: 治疗、恢复、真言术：盾
 
-### Phase 3: Polish (2-4 weeks)
-1. 经济系统
-2. 社交功能
-3. 音效和特效
-4. 平衡调整
+## 8. 装备品质
 
-## References
-- [Godot Documentation](https://docs.godotengine.org/)
-- [Godot 4 Tutorial Series](https://www.youtube.com/c/GdCh)
-- WoW Classic references for game design
+| 品质 | 颜色 | 掉落率 | 属性倍数 |
+|-----|------|--------|---------|
+| 白色 (Common) | #FFFFFF | 60% | 1.0x |
+| 绿色 (Uncommon) | #1EFF00 | 25% | 1.2x |
+| 蓝色 (Rare) | #0070DD | 10% | 1.5x |
+| 紫色 (Epic) | #A335EE | 4% | 2.0x |
+| 橙色 (Legendary) | #FF8000 | 1% | 3.0x |
