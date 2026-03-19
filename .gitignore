@@ -1,0 +1,10 @@
+.godot/
+*.import
+*.pck
+*.exe
+export/
+*.ogg.import
+*.wav.import
+*.png.import
+*.jpg.import
+*.webp.import
