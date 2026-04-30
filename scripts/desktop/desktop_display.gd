@@ -30,6 +30,44 @@ func _connect_signals() -> void:
 	EventBus.game_loaded.connect(_on_game_loaded)
 
 
+func _build_slots() -> void:
+	for child in slot_container.get_children():
+		child.queue_free()
+	slot_nodes.clear()
+	idle_nodes.clear()
+
+	for i in range(GameState.desktop_slots.size()):
+		var slot: PanelContainer = SLOT_SCENE.instantiate()
+		slot_container.add_child(slot)
+		slot.setup(i)
+		slot.slot_clicked.connect(_on_slot_clicked)
+		slot_nodes.append(slot)
+
+		var animator := Node.new()
+		animator.set_script(IDLE_SCRIPT)
+		animator.set_process(false)
+		slot.add_child(animator)
+		idle_nodes.append(animator)
+
+	_refresh_slots()
+
+
+func _refresh_slots() -> void:
+	var desktop_plants: Array = GameState.get_desktop_plants()
+	for i in range(slot_nodes.size()):
+		var plant: Plant = null
+		if i < desktop_plants.size():
+			plant = desktop_plants[i]
+		if plant != null:
+			slot_nodes[i].set_plant(plant)
+			idle_nodes[i].setup(slot_nodes[i], plant.plant_type)
+			idle_nodes[i].set_process(true)
+		else:
+			slot_nodes[i].clear_plant()
+			idle_nodes[i].stop()
+			idle_nodes[i].set_process(false)
+
+
 func _on_garden_btn_pressed() -> void:
 	SFXPlayer.play_click()
 	get_tree().change_scene_to_file("res://scenes/garden.tscn")
