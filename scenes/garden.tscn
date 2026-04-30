@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/garden/garden_grid.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/ui/seed_menu.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/ui/flower_action_menu.tscn" id="3"]
 
 [node name="Garden" type="Control"]
 layout_mode = 3
@@ -62,5 +63,12 @@ text = "已收集: 0/27 | 花圃: 6格 | 种子: 3种"
 layout_mode = 2
 text = "📖 图鉴"
 
+[node name="DesktopButton" type="Button" parent="Background/Margin/VBox/InfoBar"]
+layout_mode = 2
+text = "🖥 桌面"
+
 [node name="SeedMenu" parent="." instance=ExtResource("2")]
+visible = false
+
+[node name="FlowerActionMenu" parent="." instance=ExtResource("3")]
 visible = false
