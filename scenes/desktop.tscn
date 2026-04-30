@@ -34,24 +34,16 @@ size_flags_vertical = 3
 
 [node name="VaseArea" type="PanelContainer" parent="VBox/Center"]
 layout_mode = 2
-custom_minimum_size = Vector2(160, 200)
+custom_minimum_size = Vector2(300, 220)
 
 [node name="VBox" type="VBoxContainer" parent="VBox/Center/VaseArea"]
 layout_mode = 2
 alignment = 1
 
-[node name="FlowerIcon" type="Label" parent="VBox/Center/VaseArea/VBox"]
+[node name="FlowerContainer" type="HFlowContainer" parent="VBox/Center/VaseArea/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 64
-text = "🌸"
-horizontal_alignment = 1
-visible = false
-
-[node name="FlowerName" type="Label" parent="VBox/Center/VaseArea/VBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = ""
-horizontal_alignment = 1
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 4
 visible = false
 
 [node name="EmptyHint" type="Label" parent="VBox/Center/VaseArea/VBox"]

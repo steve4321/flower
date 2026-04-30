@@ -1,15 +1,17 @@
 extends Control
-## 插花选择：列出花圃里所有开花的植物，选一朵插到桌面花瓶
+## 插花选择：列出花圃里所有开花的植物，可连续添加多朵到花瓶
 
-signal flower_selected(plot_index: int)
-signal cancelled()
+signal flower_added(plot_index: int)
+signal done()
 
 @onready var list_vbox: VBoxContainer = $Panel/Margin/VBox/Scroll/List
+@onready var done_btn: Button = $Panel/Margin/VBox/DoneButton
 @onready var close_btn: Button = $Panel/Margin/VBox/Header/CloseButton
 
 
 func _ready() -> void:
 	close_btn.pressed.connect(_on_close_pressed)
+	done_btn.pressed.connect(_on_done_pressed)
 
 
 func popup() -> void:
@@ -31,7 +33,12 @@ func _build_list() -> void:
 		has_flowers = true
 
 		var btn := Button.new()
-		btn.text = "🌸 %s  [%s]" % [plant.display_name, plant.breeding_group]
+		var already_in_vase := plant.id in GameState.vase_flower_ids
+		if already_in_vase:
+			btn.text = "✅ %s  [%s]" % [plant.display_name, plant.breeding_group]
+			btn.disabled = true
+		else:
+			btn.text = "🌸 %s  [%s]" % [plant.display_name, plant.breeding_group]
 		btn.custom_minimum_size = Vector2(0, 36)
 		var idx := i
 		btn.pressed.connect(_on_flower_button_pressed.bind(idx))
@@ -46,12 +53,18 @@ func _build_list() -> void:
 
 
 func _on_flower_button_pressed(index: int) -> void:
-	flower_selected.emit(index)
+	flower_added.emit(index)
+	# 刷新列表，标记已添加的
+	_build_list()
+
+
+func _on_done_pressed() -> void:
+	done.emit()
 	hide()
 
 
 func _on_close_pressed() -> void:
-	cancelled.emit()
+	done.emit()
 	hide()
 
 
@@ -61,6 +74,6 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed:
 		var panel_rect: Rect2 = $Panel.get_global_rect()
 		if not panel_rect.has_point(event.global_position):
-			cancelled.emit()
+			done.emit()
 			hide()
 			get_viewport().set_input_as_handled()

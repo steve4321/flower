@@ -5,8 +5,8 @@ extends Node
 var garden_plots: Array = []
 var garden_size: int = 6
 
-## 桌面花瓶：展示的花 plant_id（空字符串=无花）
-var vase_plant_id: String = ""
+## 桌面花瓶：插花的花 plant_id 列表（可多朵）
+var vase_flower_ids: Array = []
 
 ## 花仓库：收藏的已开花植物（Array of Plant）
 var flower_storage: Array = []
@@ -124,36 +124,49 @@ func breed_plants(plot_a: int, plot_b: int, target_plot: int) -> Plant:
 
 ## === 桌面花瓶 ===
 
-## 插花到桌面花瓶（从花圃选）
-func arrange_flower(plot_index: int) -> void:
+## 插花到桌面花瓶（从花圃选，不消耗）
+func arrange_flower(plot_index: int) -> bool:
 	var p := get_plant(plot_index)
 	if p == null:
-		return
+		return false
 	if p.stage != Plant.Stage.FLOWERING:
-		return
-	vase_plant_id = p.id
+		return false
+	if p.id in vase_flower_ids:
+		return false
+	vase_flower_ids.append(p.id)
+	EventBus.desktop_changed.emit()
+	return true
+
+
+## 从花瓶移除一朵花
+func remove_vase_flower(flower_id: String) -> void:
+	vase_flower_ids.erase(flower_id)
 	EventBus.desktop_changed.emit()
 
 
 ## 清空花瓶
 func clear_vase() -> void:
-	vase_plant_id = ""
+	vase_flower_ids.clear()
 	EventBus.desktop_changed.emit()
 
 
-## 获取花瓶中展示的植物
-func get_vase_plant() -> Plant:
-	if vase_plant_id == "":
-		return null
-	# 在花园找
-	for p in garden_plots:
-		if p != null and p.id == vase_plant_id:
-			return p
-	# 在仓库找
-	for p in flower_storage:
-		if p != null and p.id == vase_plant_id:
-			return p
-	return null
+## 获取花瓶中所有植物
+func get_vase_plants() -> Array:
+	var result: Array = []
+	for fid in vase_flower_ids:
+		var found: Plant = null
+		for p in garden_plots:
+			if p != null and p.id == fid:
+				found = p
+				break
+		if found == null:
+			for p in flower_storage:
+				if p != null and p.id == fid:
+					found = p
+					break
+		if found != null:
+			result.append(found)
+	return result
 
 
 ## === 花仓库 ===
@@ -166,8 +179,8 @@ func store_flower_from_garden(plot_index: int) -> bool:
 	if p.stage != Plant.Stage.FLOWERING:
 		return false
 	# 清除花瓶引用
-	if vase_plant_id == p.id:
-		vase_plant_id = ""
+	if p.id in vase_flower_ids:
+		vase_flower_ids.erase(p.id)
 		EventBus.desktop_changed.emit()
 	flower_storage.append(p)
 	garden_plots[plot_index] = null
@@ -283,7 +296,7 @@ func to_dictionary() -> Dictionary:
 	return {
 		"garden_size": garden_size,
 		"garden_plots": plots_data,
-		"vase_plant_id": vase_plant_id,
+		"vase_flower_ids": vase_flower_ids,
 		"seed_inventory": seed_inventory,
 		"encyclopedia": encyclopedia,
 		"flower_storage": storage_data,
@@ -301,7 +314,9 @@ func from_dictionary(data: Dictionary) -> void:
 			garden_plots.append(null)
 	while garden_plots.size() < garden_size:
 		garden_plots.append(null)
-	vase_plant_id = data.get("vase_plant_id", "")
+	vase_flower_ids.clear()
+	for fid in data.get("vase_flower_ids", []):
+		vase_flower_ids.append(fid)
 	seed_inventory.clear()
 	for s in data.get("seed_inventory", ["rose_red", "daisy_white", "tulip_yellow"]):
 		seed_inventory.append(s)
