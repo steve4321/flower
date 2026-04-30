@@ -27,24 +27,48 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-alignment = 2
+
+[node name="Center" type="CenterContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VaseArea" type="PanelContainer" parent="VBox/Center"]
+layout_mode = 2
+custom_minimum_size = Vector2(160, 200)
+
+[node name="VBox" type="VBoxContainer" parent="VBox/Center/VaseArea"]
+layout_mode = 2
+alignment = 1
+
+[node name="FlowerIcon" type="Label" parent="VBox/Center/VaseArea/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 64
+text = "🌸"
+horizontal_alignment = 1
+visible = false
+
+[node name="FlowerName" type="Label" parent="VBox/Center/VaseArea/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = ""
+horizontal_alignment = 1
+visible = false
+
+[node name="EmptyHint" type="Label" parent="VBox/Center/VaseArea/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "💐 点击插花"
+horizontal_alignment = 1
+
+[node name="Hint" type="Label" parent="VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "点击花瓶插花"
+horizontal_alignment = 1
 
 [node name="Bar" type="HBoxContainer" parent="VBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 130)
-
-[node name="LeftSpacer" type="Control" parent="VBox/Bar"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="SlotContainer" type="HBoxContainer" parent="VBox/Bar"]
-layout_mode = 2
-theme_override_constants/separation = 12
 alignment = 1
-
-[node name="RightSpacer" type="Control" parent="VBox/Bar"]
-layout_mode = 2
-size_flags_horizontal = 3
 
 [node name="GardenButton" type="Button" parent="VBox/Bar"]
 layout_mode = 2
@@ -57,9 +81,3 @@ layout_mode = 2
 custom_minimum_size = Vector2(80, 40)
 theme_override_font_sizes/font_size = 14
 text = "🌱 培育室"
-
-[node name="Hint" type="Label" parent="VBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 10
-text = "点击花朵位置从仓库选花展示"
-horizontal_alignment = 1

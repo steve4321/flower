@@ -5,8 +5,8 @@ extends Node
 var garden_plots: Array = []
 var garden_size: int = 6
 
-## 桌面展示位：Array of plant_id or null
-var desktop_slots: Array = [null, null, null]
+## 桌面花瓶：展示的花 plant_id（空字符串=无花）
+var vase_plant_id: String = ""
 
 ## 花仓库：收藏的已开花植物（Array of Plant）
 var flower_storage: Array = []
@@ -122,25 +122,38 @@ func breed_plants(plot_a: int, plot_b: int, target_plot: int) -> Plant:
 	return child
 
 
-## 摆到桌面
-func set_desktop_slot(slot_index: int, plot_index: int) -> void:
-	if slot_index < 0 or slot_index >= desktop_slots.size():
-		return
+## === 桌面花瓶 ===
+
+## 插花到桌面花瓶（从花圃选）
+func arrange_flower(plot_index: int) -> void:
 	var p := get_plant(plot_index)
 	if p == null:
 		return
 	if p.stage != Plant.Stage.FLOWERING:
 		return
-	desktop_slots[slot_index] = p.id
+	vase_plant_id = p.id
 	EventBus.desktop_changed.emit()
 
 
-## 从桌面收回
-func clear_desktop_slot(slot_index: int) -> void:
-	if slot_index < 0 or slot_index >= desktop_slots.size():
-		return
-	desktop_slots[slot_index] = null
+## 清空花瓶
+func clear_vase() -> void:
+	vase_plant_id = ""
 	EventBus.desktop_changed.emit()
+
+
+## 获取花瓶中展示的植物
+func get_vase_plant() -> Plant:
+	if vase_plant_id == "":
+		return null
+	# 在花园找
+	for p in garden_plots:
+		if p != null and p.id == vase_plant_id:
+			return p
+	# 在仓库找
+	for p in flower_storage:
+		if p != null and p.id == vase_plant_id:
+			return p
+	return null
 
 
 ## === 花仓库 ===
@@ -152,11 +165,10 @@ func store_flower_from_garden(plot_index: int) -> bool:
 		return false
 	if p.stage != Plant.Stage.FLOWERING:
 		return false
-	# 检查桌面引用，同步清除
-	for i in range(desktop_slots.size()):
-		if desktop_slots[i] == p.id:
-			desktop_slots[i] = null
-			EventBus.desktop_changed.emit()
+	# 清除花瓶引用
+	if vase_plant_id == p.id:
+		vase_plant_id = ""
+		EventBus.desktop_changed.emit()
 	flower_storage.append(p)
 	garden_plots[plot_index] = null
 	EventBus.flower_stored.emit(plot_index)
@@ -178,17 +190,6 @@ func retrieve_flower_to_garden(storage_index: int, plot_index: int) -> bool:
 	EventBus.flower_retrieved.emit(plot_index)
 	EventBus.garden_changed.emit()
 	return true
-
-
-## 从仓库选花摆到桌面
-func set_desktop_from_storage(slot_index: int, storage_index: int) -> void:
-	if slot_index < 0 or slot_index >= desktop_slots.size():
-		return
-	if storage_index < 0 or storage_index >= flower_storage.size():
-		return
-	var p: Plant = flower_storage[storage_index]
-	desktop_slots[slot_index] = p.id
-	EventBus.desktop_changed.emit()
 
 
 ## 培育两株仓库里的花（不消耗，结果直接变种子）
@@ -233,29 +234,6 @@ func breed_from_storage(storage_a: int, storage_b: int) -> Dictionary:
 		"color": result.color,
 		"is_new": is_new_discovery,
 	}
-
-
-## 获取桌面展示的植物
-func get_desktop_plants() -> Array:
-	var result: Array = []
-	for slot_id in desktop_slots:
-		if slot_id == null:
-			result.append(null)
-		else:
-			var found: Plant = null
-			# 先在花园找
-			for p in garden_plots:
-				if p != null and p.id == slot_id:
-					found = p
-					break
-			# 再在仓库找
-			if found == null:
-				for p in flower_storage:
-					if p != null and p.id == slot_id:
-						found = p
-						break
-			result.append(found)
-	return result
 
 
 ## 检查新发现
@@ -305,7 +283,7 @@ func to_dictionary() -> Dictionary:
 	return {
 		"garden_size": garden_size,
 		"garden_plots": plots_data,
-		"desktop_slots": desktop_slots,
+		"vase_plant_id": vase_plant_id,
 		"seed_inventory": seed_inventory,
 		"encyclopedia": encyclopedia,
 		"flower_storage": storage_data,
@@ -323,7 +301,7 @@ func from_dictionary(data: Dictionary) -> void:
 			garden_plots.append(null)
 	while garden_plots.size() < garden_size:
 		garden_plots.append(null)
-	desktop_slots = data.get("desktop_slots", [null, null, null])
+	vase_plant_id = data.get("vase_plant_id", "")
 	seed_inventory.clear()
 	for s in data.get("seed_inventory", ["rose_red", "daisy_white", "tulip_yellow"]):
 		seed_inventory.append(s)

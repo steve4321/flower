@@ -60,7 +60,6 @@ func _connect_signals() -> void:
 	seed_menu.seed_selected.connect(_on_seed_selected)
 	seed_menu.cancelled.connect(_on_seed_menu_cancelled)
 
-	flower_action_menu.send_to_desktop.connect(_on_send_to_desktop)
 	flower_action_menu.store_in_storage.connect(_on_store_in_storage)
 	flower_action_menu.remove_plant.connect(_on_action_remove_plant)
 	flower_action_menu.cancelled.connect(_on_action_menu_cancelled)
@@ -151,23 +150,6 @@ func _on_breeding_room_pressed() -> void:
 
 
 ## === 操作菜单回调 ===
-
-func _on_send_to_desktop(plot_index: int) -> void:
-	var plant: Plant = GameState.get_plant(plot_index)
-	if plant == null:
-		return
-	var slot_index := -1
-	for i in range(GameState.desktop_slots.size()):
-		if GameState.desktop_slots[i] == null:
-			slot_index = i
-			break
-	if slot_index >= 0:
-		GameState.set_desktop_slot(slot_index, plot_index)
-		info_label.text = "%s 已摆到桌面 ✅" % plant.display_name
-	else:
-		GameState.set_desktop_slot(0, plot_index)
-		info_label.text = "桌面已满，%s 替换了第1位" % plant.display_name
-
 
 func _on_store_in_storage(plot_index: int) -> void:
 	var plant: Plant = GameState.get_plant(plot_index)

@@ -64,7 +64,7 @@ func new_game() -> void:
 	GameState.garden_plots.clear()
 	GameState.garden_plots.resize(GameState.garden_size)
 	GameState.garden_plots.fill(null)
-	GameState.desktop_slots = [null, null, null]
+	GameState.vase_plant_id = ""
 	GameState.flower_storage.clear()
 	GameState.seed_inventory = ["rose_red", "daisy_white", "tulip_yellow"]
 	GameState.encyclopedia = {}
