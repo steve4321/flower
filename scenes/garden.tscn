@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/garden/garden_grid.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/ui/seed_menu.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/flower_action_menu.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/ui/encyclopedia.tscn" id="4"]
 
 [node name="Garden" type="Control"]
 layout_mode = 3
@@ -71,4 +72,7 @@ text = "🖥 桌面"
 visible = false
 
 [node name="FlowerActionMenu" parent="." instance=ExtResource("3")]
+visible = false
+
+[node name="Encyclopedia" parent="." instance=ExtResource("4")]
 visible = false
