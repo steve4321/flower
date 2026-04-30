@@ -1,5 +1,5 @@
 extends Node
-## 全局游戏状态：花圃、桌面、种子库、图鉴
+## 全局游戏状态：花圃、桌面、种子库、图鉴、花仓库
 
 ## 花圃格子：Array of Plant or null
 var garden_plots: Array = []
@@ -7,6 +7,9 @@ var garden_size: int = 6
 
 ## 桌面展示位：Array of plant_id or null
 var desktop_slots: Array = [null, null, null]
+
+## 花仓库：收藏的已开花植物（Array of Plant）
+var flower_storage: Array = []
 
 ## 种子库：已经发现的品种列表
 var seed_inventory: Array[String] = []
@@ -140,6 +143,98 @@ func clear_desktop_slot(slot_index: int) -> void:
 	EventBus.desktop_changed.emit()
 
 
+## === 花仓库 ===
+
+## 将花园中开花的植物收入仓库
+func store_flower_from_garden(plot_index: int) -> bool:
+	var p := get_plant(plot_index)
+	if p == null:
+		return false
+	if p.stage != Plant.Stage.FLOWERING:
+		return false
+	# 检查桌面引用，同步清除
+	for i in range(desktop_slots.size()):
+		if desktop_slots[i] == p.id:
+			desktop_slots[i] = null
+			EventBus.desktop_changed.emit()
+	flower_storage.append(p)
+	garden_plots[plot_index] = null
+	EventBus.flower_stored.emit(plot_index)
+	EventBus.garden_changed.emit()
+	return true
+
+
+## 从仓库取花放回花园空格
+func retrieve_flower_to_garden(storage_index: int, plot_index: int) -> bool:
+	if storage_index < 0 or storage_index >= flower_storage.size():
+		return false
+	if plot_index < 0 or plot_index >= garden_plots.size():
+		return false
+	if garden_plots[plot_index] != null:
+		return false
+	var p: Plant = flower_storage[storage_index]
+	flower_storage.remove_at(storage_index)
+	garden_plots[plot_index] = p
+	EventBus.flower_retrieved.emit(plot_index)
+	EventBus.garden_changed.emit()
+	return true
+
+
+## 从仓库选花摆到桌面
+func set_desktop_from_storage(slot_index: int, storage_index: int) -> void:
+	if slot_index < 0 or slot_index >= desktop_slots.size():
+		return
+	if storage_index < 0 or storage_index >= flower_storage.size():
+		return
+	var p: Plant = flower_storage[storage_index]
+	desktop_slots[slot_index] = p.id
+	EventBus.desktop_changed.emit()
+
+
+## 培育两株仓库里的花（不消耗，结果直接变种子）
+func breed_from_storage(storage_a: int, storage_b: int) -> Dictionary:
+	if storage_a < 0 or storage_a >= flower_storage.size():
+		return {}
+	if storage_b < 0 or storage_b >= flower_storage.size():
+		return {}
+	var parent_a: Plant = flower_storage[storage_a]
+	var parent_b: Plant = flower_storage[storage_b]
+	if parent_a.stage != Plant.Stage.FLOWERING or parent_b.stage != Plant.Stage.FLOWERING:
+		return {}
+	if not GeneSystem.can_breed_across_groups(
+		PlantData.get_group(parent_a.plant_type),
+		PlantData.get_group(parent_b.plant_type)):
+		return {"error": "incompatible"}
+
+	var result: Dictionary = GeneSystem.breed(
+		parent_a.plant_type, parent_b.plant_type,
+		parent_a.color, parent_b.color)
+
+	# 结果直接加入种子库
+	var new_type: String = result.plant_type
+	if not new_type in seed_inventory:
+		seed_inventory.append(new_type)
+
+	# 检查新发现
+	var new_data: Dictionary = PlantData.get_data(new_type)
+	var is_new_discovery := not encyclopedia.has(new_type)
+	if is_new_discovery:
+		encyclopedia[new_type] = true
+		if result.is_rare:
+			EventBus.rare_flower_found.emit(new_type)
+		_check_garden_expansion()
+
+	EventBus.breeding_done.emit(new_type, result.is_rare, is_new_discovery)
+	return {
+		"plant_type": new_type,
+		"plant_name": new_data.get("name", "???"),
+		"is_rare": result.is_rare,
+		"rare_type": result.rare_type,
+		"color": result.color,
+		"is_new": is_new_discovery,
+	}
+
+
 ## 获取桌面展示的植物
 func get_desktop_plants() -> Array:
 	var result: Array = []
@@ -148,10 +243,17 @@ func get_desktop_plants() -> Array:
 			result.append(null)
 		else:
 			var found: Plant = null
+			# 先在花园找
 			for p in garden_plots:
 				if p != null and p.id == slot_id:
 					found = p
 					break
+			# 再在仓库找
+			if found == null:
+				for p in flower_storage:
+					if p != null and p.id == slot_id:
+						found = p
+						break
 			result.append(found)
 	return result
 
@@ -196,12 +298,17 @@ func to_dictionary() -> Dictionary:
 			plots_data.append(p.to_dictionary())
 		else:
 			plots_data.append(null)
+	var storage_data: Array = []
+	for p in flower_storage:
+		if p != null:
+			storage_data.append(p.to_dictionary())
 	return {
 		"garden_size": garden_size,
 		"garden_plots": plots_data,
 		"desktop_slots": desktop_slots,
 		"seed_inventory": seed_inventory,
 		"encyclopedia": encyclopedia,
+		"flower_storage": storage_data,
 	}
 
 
@@ -221,3 +328,7 @@ func from_dictionary(data: Dictionary) -> void:
 	for s in data.get("seed_inventory", ["rose_red", "daisy_white", "tulip_yellow"]):
 		seed_inventory.append(s)
 	encyclopedia = data.get("encyclopedia", {})
+	flower_storage.clear()
+	for entry in data.get("flower_storage", []):
+		if entry != null and entry is Dictionary:
+			flower_storage.append(Plant.from_dictionary(entry))

@@ -11,9 +11,12 @@ func _ready() -> void:
 	EventBus.stage_advanced.connect(_on_state_changed)
 	EventBus.breeding_started.connect(_on_state_changed)
 	EventBus.breeding_revealed.connect(_on_state_changed)
+	EventBus.breeding_done.connect(_on_state_changed)
 	EventBus.flower_discovered.connect(_on_state_changed)
 	EventBus.garden_expanded.connect(_on_state_changed)
 	EventBus.desktop_changed.connect(_on_state_changed)
+	EventBus.flower_stored.connect(_on_state_changed)
+	EventBus.flower_retrieved.connect(_on_state_changed)
 
 
 func has_save() -> bool:
@@ -62,6 +65,7 @@ func new_game() -> void:
 	GameState.garden_plots.resize(GameState.garden_size)
 	GameState.garden_plots.fill(null)
 	GameState.desktop_slots = [null, null, null]
+	GameState.flower_storage.clear()
 	GameState.seed_inventory = ["rose_red", "daisy_white", "tulip_yellow"]
 	GameState.encyclopedia = {}
 

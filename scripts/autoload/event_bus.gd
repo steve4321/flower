@@ -10,6 +10,11 @@ signal stage_advanced(plot_index: int, new_stage: int)
 # 培育
 signal breeding_started(plot_index: int, parent_a: int, parent_b: int)
 signal breeding_revealed(plot_index: int, plant_type: String)
+signal breeding_done(plant_type: String, is_rare: bool, is_new: bool)
+
+# 花仓库
+signal flower_stored(plot_index: int)
+signal flower_retrieved(plot_index: int)
 
 # 发现
 signal flower_discovered(plant_type: String)

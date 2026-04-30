@@ -52,8 +52,14 @@ custom_minimum_size = Vector2(80, 40)
 theme_override_font_sizes/font_size = 14
 text = "🌿 花圃"
 
+[node name="BreedingRoomButton" type="Button" parent="VBox/Bar"]
+layout_mode = 2
+custom_minimum_size = Vector2(80, 40)
+theme_override_font_sizes/font_size = 14
+text = "🌱 培育室"
+
 [node name="Hint" type="Label" parent="VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 10
-text = "点击花朵进入花圃"
+text = "点击花朵位置从仓库选花展示"
 horizontal_alignment = 1

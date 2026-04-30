@@ -12,6 +12,7 @@ const PLOT_SCENE := preload("res://scenes/ui/garden_plot.tscn")
 @onready var info_label: Label = $Background/Margin/VBox/InfoBar/InfoLabel
 @onready var encyclopedia_btn: Button = $Background/Margin/VBox/InfoBar/EncyclopediaButton
 @onready var desktop_btn: Button = $Background/Margin/VBox/InfoBar/DesktopButton
+@onready var breeding_room_btn: Button = $Background/Margin/VBox/InfoBar/BreedingRoomButton
 
 var plot_nodes: Array[PanelContainer] = []
 var _selected_plot: int = -1
@@ -61,11 +62,13 @@ func _connect_signals() -> void:
 	EventBus.flower_discovered.connect(_on_flower_discovered)
 	EventBus.garden_expanded.connect(_on_garden_expanded)
 	EventBus.game_loaded.connect(_on_game_loaded)
+	EventBus.flower_stored.connect(_on_flower_stored)
 
 	seed_menu.seed_selected.connect(_on_seed_selected)
 	seed_menu.cancelled.connect(_on_seed_menu_cancelled)
 
 	flower_action_menu.send_to_desktop.connect(_on_send_to_desktop)
+	flower_action_menu.store_in_storage.connect(_on_store_in_storage)
 	flower_action_menu.start_breeding.connect(_on_start_breeding)
 	flower_action_menu.remove_plant.connect(_on_action_remove_plant)
 
@@ -74,6 +77,7 @@ func _connect_signals() -> void:
 
 	encyclopedia_btn.pressed.connect(_on_encyclopedia_pressed)
 	desktop_btn.pressed.connect(_on_desktop_btn_pressed)
+	breeding_room_btn.pressed.connect(_on_breeding_room_pressed)
 
 
 func _refresh_all_plots() -> void:
@@ -254,7 +258,13 @@ func _get_plot_at_position(global_pos: Vector2) -> int:
 ## === 场景切换 ===
 
 func _on_desktop_btn_pressed() -> void:
+	SFXPlayer.play_click()
 	get_tree().change_scene_to_file("res://scenes/desktop.tscn")
+
+
+func _on_breeding_room_pressed() -> void:
+	SFXPlayer.play_click()
+	get_tree().change_scene_to_file("res://scenes/breeding_room.tscn")
 
 
 ## === 操作菜单回调 ===
@@ -278,6 +288,16 @@ func _on_send_to_desktop(plot_index: int) -> void:
 
 func _on_start_breeding(plot_index: int) -> void:
 	_enter_breeding_mode(plot_index)
+
+
+func _on_store_in_storage(plot_index: int) -> void:
+	var plant: Plant = GameState.get_plant(plot_index)
+	if plant == null:
+		return
+	GameState.store_flower_from_garden(plot_index)
+	_refresh_plot(plot_index)
+	info_label.text = "📦 %s 已收入仓库" % plant.display_name
+	_update_info()
 
 
 func _on_action_remove_plant(plot_index: int) -> void:
@@ -324,6 +344,11 @@ func _on_flower_discovered(plant_type: String) -> void:
 	var data: Dictionary = PlantData.get_data(plant_type)
 	var plant_name: String = data.get("name", plant_type)
 	info_label.text = "🎉 新发现：%s！已加入种子库和图鉴" % plant_name
+	_update_info()
+
+
+func _on_flower_stored(_plot_index: int) -> void:
+	_refresh_all_plots()
 	_update_info()
 
 

@@ -68,6 +68,10 @@ text = "📖 图鉴"
 layout_mode = 2
 text = "🖥 桌面"
 
+[node name="BreedingRoomButton" type="Button" parent="Background/Margin/VBox/InfoBar"]
+layout_mode = 2
+text = "🌱 培育室"
+
 [node name="SeedMenu" parent="." instance=ExtResource("2")]
 visible = false
 
