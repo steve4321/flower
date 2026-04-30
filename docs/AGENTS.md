@@ -2,8 +2,8 @@
 
 ## Project Overview
 Desktop flower cultivation game with breeding and collection. Built with Godot 4.x.
-Two spaces: desktop display (screensaver) + garden window (gameplay).
-Core loop: water plants to grow → breed for surprises → collect in encyclopedia → display favorites on desktop.
+Three spaces: desktop vase (display) + garden (gameplay) + breeding room (breeding).
+Core loop: water plants to grow → store in warehouse → breed in breeding room for new seeds → arrange flowers in desktop vase → collect in encyclopedia.
 
 ## Engine & Tools
 - **Engine**: Godot 4.6.2
@@ -88,34 +88,40 @@ flower-desktop/
 │   │   └── sfx/
 │   └── fonts/
 ├── scenes/
-│   ├── desktop.tscn          # Desktop display scene
+│   ├── desktop.tscn          # Desktop vase display scene
 │   ├── garden.tscn           # Garden main scene
+│   ├── breeding_room.tscn    # Breeding room scene
 │   ├── ui/
 │   │   ├── garden_plot.tscn  # Single planting grid cell
 │   │   ├── encyclopedia.tscn # Encyclopedia panel
-│   │   └── plant_detail.tscn # Plant detail popup
-│   └── effects/
-│       ├── water_drop.tscn   # Watering effect
-│       ├── bloom_reveal.tscn # Bloom reveal effect
-│       └── rare_sparkle.tscn # Rare flower effect
+│   │   ├── plant_detail.tscn # Plant detail popup
+│   │   ├── flower_picker.tscn # Flower selection for breeding
+│   │   └── flower_arrange.tscn # Desktop vase arrangement UI
+│   ├── warehouse.tscn        # Flower storage scene
 ├── scripts/
 │   ├── autoload/
-│   │   ├── game_state.gd     # Global state (garden, desktop, seeds)
-│   │   ├── gene_system.gd    # Color mixing, breeding logic
-│   │   └── save_manager.gd   # Save/load persistence
+│   │   ├── event_bus.gd      # Signal bus for decoupled events
+│   │   ├── game_state.gd     # Global state (garden, vase, warehouse, seeds, encyclopedia)
+│   │   ├── gene_system.gd    # Color mixing, breeding logic, rare detection
+│   │   ├── save_manager.gd   # JSON persistence, auto-save
+│   │   └── sfx_player.gd      # Sound effects player (silent placeholder)
 │   ├── core/
 │   │   ├── plant.gd          # Plant data class
 │   │   └── plant_data.gd     # Plant database (all varieties)
 │   ├── garden/
 │   │   ├── garden_grid.gd    # Garden grid management
-│   │   ├── garden_plot.gd    # Single plot cell
-│   │   └── breeding.gd       # Breeding logic
+│   │   └── garden_plot.gd    # Single plot cell
 │   ├── desktop/
-│   │   ├── desktop_display.gd # Desktop display manager
+│   │   ├── desktop_display.gd # Desktop vase display manager
 │   │   └── idle_animator.gd  # Idle animation controller
+│   ├── warehouse/
+│   │   └── warehouse.gd       # Flower storage management
 │   └── ui/
-│       ├── encyclopedia.gd   # Encyclopedia UI
-│       └── plant_detail.gd   # Plant detail popup
+│       ├── encyclopedia.gd    # Encyclopedia UI
+│       ├── plant_detail.gd    # Plant detail popup
+│       ├── flower_picker.gd   # Flower selection for breeding
+│       ├── flower_arrange.gd  # Desktop vase arrangement
+│       └── breeding_room.gd   # Breeding room UI
 ├── project.godot
 └── README.md
 ```
@@ -124,9 +130,11 @@ flower-desktop/
 ```
 Project > Project Settings > Autoload
 ```
-- `GameState` - Garden data, desktop slots, seed inventory, encyclopedia
+- `EventBus` - Signal bus for decoupled events
+- `GameState` - Garden data, vase slots, warehouse, seed inventory, encyclopedia
 - `GeneSystem` - Color mixing, breeding calculations, rare detection
 - `SaveManager` - JSON persistence, auto-save
+- `SFXPlayer` - Sound effects player (silent placeholder)
 
 ### Node Naming Conventions
 - Root node: Match filename (GardenGrid, PlantDetail)
@@ -154,6 +162,9 @@ signal stage_advanced(plot_id: int, new_stage: int)
 signal flower_discovered(plant_type: String)
 signal rare_flower_found(plant_type: String)
 signal garden_changed()
+signal flower_stored(plot_index: int)
+signal flower_retrieved(plot_index: int)
+signal breeding_done(plant_type: String, is_rare: bool, is_new: bool)
 
 # broadcaster.gd
 EventBus.plant_watered.emit(plot_id)
