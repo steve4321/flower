@@ -152,13 +152,8 @@ func _on_breeding_room_pressed() -> void:
 ## === 操作菜单回调 ===
 
 func _on_store_in_storage(plot_index: int) -> void:
-	var plant: Plant = GameState.get_plant(plot_index)
-	if plant == null:
-		return
-	var plant_name: String = plant.display_name
 	GameState.store_flower_from_garden(plot_index)
 	_refresh_plot(plot_index)
-	info_label.text = "📦 %s 已收入仓库" % plant_name
 	_update_info()
 
 
@@ -202,10 +197,7 @@ func _on_stage_advanced(plot_index: int, _new_stage: int) -> void:
 	_update_info()
 
 
-func _on_flower_discovered(plant_type: String) -> void:
-	var data: Dictionary = PlantData.get_data(plant_type)
-	var plant_name: String = data.get("name", plant_type)
-	info_label.text = "🎉 新发现：%s！已加入种子库和图鉴" % plant_name
+func _on_flower_discovered(_plant_type: String) -> void:
 	_update_info()
 
 
