@@ -6,7 +6,7 @@ Two spaces: desktop display (screensaver) + garden window (gameplay).
 Core loop: water plants to grow → breed for surprises → collect in encyclopedia → display favorites on desktop.
 
 ## Engine & Tools
-- **Engine**: Godot 4.2+
+- **Engine**: Godot 4.6.2
 - **Language**: GDScript
 - **IDE**: VS Code with Godot Tools extension, or Godot editor
 

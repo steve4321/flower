@@ -2,7 +2,7 @@
 
 > 桌面花圃养花游戏 — 种花、培育、收藏，没事浇浇水
 
-![Godot 4.2+](https://img.shields.io/badge/Godot-4.2+-blue)
+![Godot 4.6.2](https://img.shields.io/badge/Godot-4.6.2-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 ## 简介
