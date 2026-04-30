@@ -107,7 +107,7 @@ func _on_plot_clicked(index: int) -> void:
 
 func _input(event: InputEvent) -> void:
     # 任何弹窗打开时忽略右键操作
-    if seed_menu.visible or flower_action_menu.visible:
+    if (seed_menu != null and seed_menu.visible) or (flower_action_menu != null and flower_action_menu.visible):
         return
     # 右键移除植物
     if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:

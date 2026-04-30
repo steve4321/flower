@@ -13,9 +13,9 @@ var _plot_index: int = -1
 
 
 func _ready() -> void:
-    desktop_btn.pressed.connect(func(): send_to_desktop.emit(_plot_index); hide())
-    remove_btn.pressed.connect(func(): remove_plant.emit(_plot_index); hide())
-    cancel_btn.pressed.connect(func(): cancelled.emit(); hide())
+    desktop_btn.pressed.connect(_on_desktop_pressed)
+    remove_btn.pressed.connect(_on_remove_pressed)
+    cancel_btn.pressed.connect(_on_cancel_pressed)
 
 
 func popup(plot_index: int, plant_name: String) -> void:
@@ -25,13 +25,27 @@ func popup(plot_index: int, plant_name: String) -> void:
     show()
 
 
+func _on_desktop_pressed() -> void:
+    send_to_desktop.emit(_plot_index)
+    hide()
+
+
+func _on_remove_pressed() -> void:
+    remove_plant.emit(_plot_index)
+    hide()
+
+
+func _on_cancel_pressed() -> void:
+    cancelled.emit()
+    hide()
+
+
 func _input(event: InputEvent) -> void:
     if not visible:
         return
     if event is InputEventMouseButton and event.pressed:
-        # 点击菜单外部关闭
         var panel_rect: Rect2 = $Panel.get_global_rect()
         if not panel_rect.has_point(event.global_position):
             cancelled.emit()
             hide()
-            get_viewport().set_input_as_handled()  # 阻止事件继续传播（防止右键误删植物）
+            get_viewport().set_input_as_handled()
