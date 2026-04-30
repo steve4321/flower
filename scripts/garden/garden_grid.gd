@@ -302,9 +302,9 @@ func _on_stage_advanced(plot_index: int, _new_stage: int) -> void:
 
 
 func _on_flower_discovered(plant_type: String) -> void:
-    var data := PlantData.get_data(plant_type)
-    var name := data.get("name", plant_type)
-    info_label.text = "🎉 新发现：%s！已加入种子库和图鉴" % name
+    var data: Dictionary = PlantData.get_data(plant_type)
+    var plant_name: String = data.get("name", plant_type)
+    info_label.text = "🎉 新发现：%s！已加入种子库和图鉴" % plant_name
     _update_info()
 
 
