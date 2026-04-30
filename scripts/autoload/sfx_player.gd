@@ -30,3 +30,8 @@ func play_rare() -> void:
 func play_discover() -> void:
 	# EventBus.flower_discovered 触发
 	pass
+
+
+func play_click() -> void:
+	# 按钮点击触发
+	pass
