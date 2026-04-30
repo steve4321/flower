@@ -6,6 +6,7 @@ signal plot_clicked(plot_index: int)
 @export var plot_index: int = -1
 
 var _current_plant: Plant = null
+var _highlighted: bool = false
 
 @onready var plant_icon: Label = $VBox/PlantIcon
 @onready var stage_label: Label = $VBox/StageLabel
@@ -39,6 +40,11 @@ func clear_plant() -> void:
 
 
 func update_display() -> void:
+	_update_display()
+
+
+func set_highlight(enabled: bool) -> void:
+	_highlighted = enabled
 	_update_display()
 
 
@@ -86,7 +92,7 @@ func _update_display() -> void:
 	else:
 		stage_label.text = "🌸 开花"
 
-	# 背景色：开花时绿色，普通时泥土色
+	# 背景色：开花时绿色，普通时泥土色，高亮时金色边框
 	var style := StyleBoxFlat.new()
 	style.set_corner_radius_all(8)
 	if _current_plant.stage == Plant.Stage.FLOWERING:
@@ -96,6 +102,9 @@ func _update_display() -> void:
 		style.bg_color = Color(0.3, 0.22, 0.15, 0.85)
 		style.border_color = Color(0.4, 0.3, 0.2)
 	style.set_border_width_all(3)
+	if _highlighted:
+		style.border_color = Color(1.0, 0.85, 0.2)
+		style.set_border_width_all(4)
 	add_theme_stylebox_override("panel", style)
 
 

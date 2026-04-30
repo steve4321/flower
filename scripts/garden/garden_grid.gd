@@ -1,6 +1,8 @@
 extends Control
 ## 花圃网格管理：创建/管理所有格子，处理交互
 
+enum Mode { NORMAL, BREEDING_SELECT }
+
 const PLOT_SCENE := preload("res://scenes/ui/garden_plot.tscn")
 
 @onready var grid_container: GridContainer = $Background/Margin/VBox/GridContainer
@@ -12,6 +14,8 @@ const PLOT_SCENE := preload("res://scenes/ui/garden_plot.tscn")
 
 var plot_nodes: Array[PanelContainer] = []
 var _selected_plot: int = -1
+var _mode: Mode = Mode.NORMAL
+var _breeding_parent_a: int = -1
 
 
 func _ready() -> void:
@@ -39,7 +43,7 @@ func _build_grid() -> void:
     # 创建格子
     for i in range(GameState.garden_size):
         var plot: PanelContainer = PLOT_SCENE.instantiate()
-        grid_container.add_child(plot)  # 先加入场景树，@onready变量才能初始化
+        grid_container.add_child(plot)
         plot.setup(i)
         plot.plot_clicked.connect(_on_plot_clicked)
         plot_nodes.append(plot)
@@ -61,6 +65,7 @@ func _connect_signals() -> void:
     seed_menu.cancelled.connect(_on_seed_menu_cancelled)
 
     flower_action_menu.send_to_desktop.connect(_on_send_to_desktop)
+    flower_action_menu.start_breeding.connect(_on_start_breeding)
     flower_action_menu.remove_plant.connect(_on_action_remove_plant)
     flower_action_menu.cancelled.connect(_on_action_menu_cancelled)
 
@@ -74,6 +79,7 @@ func _refresh_all_plots() -> void:
             plot_nodes[i].set_plant(GameState.garden_plots[i])
         else:
             plot_nodes[i].clear_plant()
+    _update_breeding_highlights()
 
 
 func _refresh_plot(index: int) -> void:
@@ -87,30 +93,123 @@ func _update_info() -> void:
     info_label.text = "已收集: %d/%d | 花圃: %d格 | 种子: %d种" % [collected, total, GameState.garden_size, GameState.seed_inventory.size()]
 
 
+## === 培育高亮 ===
+
+func _update_breeding_highlights() -> void:
+    for i in range(plot_nodes.size()):
+        if _mode == Mode.BREEDING_SELECT:
+            var plant: Plant = GameState.get_plant(i)
+            var eligible := plant != null and plant.stage == Plant.Stage.FLOWERING and i != _breeding_parent_a
+            plot_nodes[i].set_highlight(eligible)
+        else:
+            plot_nodes[i].set_highlight(false)
+
+
+func _enter_breeding_mode(parent_a: int) -> void:
+    _mode = Mode.BREEDING_SELECT
+    _breeding_parent_a = parent_a
+    var parent: Plant = GameState.get_plant(parent_a)
+    info_label.text = "🌱 培育模式：选择第二朵花与 %s 配对 | 右键取消" % (parent.display_name if parent else "???")
+    _update_breeding_highlights()
+
+
+func _exit_breeding_mode() -> void:
+    _mode = Mode.NORMAL
+    _breeding_parent_a = -1
+    _update_breeding_highlights()
+    _update_info()
+
+
 ## === 交互处理 ===
 
 func _on_plot_clicked(index: int) -> void:
     var plant: Plant = GameState.get_plant(index)
 
+    match _mode:
+        Mode.BREEDING_SELECT:
+            _handle_breeding_click(index, plant)
+        Mode.NORMAL:
+            _handle_normal_click(index, plant)
+
+
+func _handle_normal_click(index: int, plant: Plant) -> void:
     if plant == null:
         # 空格 → 打开种子选择
         _selected_plot = index
         seed_menu.popup_seed_menu()
     elif plant.stage == Plant.Stage.FLOWERING:
-        # 开花 → 打开操作菜单（摆到桌面/移除）
+        # 开花 → 打开操作菜单
         flower_action_menu.popup(index, plant.display_name)
     else:
-        # 有植物但未开花 → 浇水（信号回调自动刷新显示）
+        # 有植物但未开花 → 浇水
         GameState.water_plant(index)
         _update_info()
+
+
+func _handle_breeding_click(index: int, plant: Plant) -> void:
+    if plant == null or plant.stage != Plant.Stage.FLOWERING or index == _breeding_parent_a:
+        info_label.text = "⚠️ 请选择另一朵已开花的花"
+        return
+
+    # 检查培育可行性
+    var parent_a: Plant = GameState.get_plant(_breeding_parent_a)
+    if parent_a == null:
+        info_label.text = "⚠️ 亲本已不存在"
+        _exit_breeding_mode()
+        return
+
+    if not GeneSystem.can_breed_across_groups(
+        PlantData.get_group(parent_a.plant_type),
+        PlantData.get_group(plant.plant_type)):
+        info_label.text = "⚠️ 花卉和多肉/仙人掌无法培育"
+        _exit_breeding_mode()
+        return
+
+    # 找空格放芽苗
+    var target_plot := _find_empty_plot()
+    if target_plot < 0:
+        info_label.text = "⚠️ 没有空格位了，先移除一株植物"
+        _exit_breeding_mode()
+        return
+
+    # 执行培育
+    var child: Plant = GameState.breed_plants(_breeding_parent_a, index, target_plot)
+    if child == null:
+        info_label.text = "⚠️ 培育失败"
+        _exit_breeding_mode()
+        return
+
+    var result_type := _get_breed_result_description(child)
+    info_label.text = "🌱 培育成功！新芽苗出现在第%d格 — %s" % [target_plot + 1, result_type]
+    _exit_breeding_mode()
+
+
+func _get_breed_result_description(plant: Plant) -> String:
+    if plant.is_rare:
+        return "✨ 稀有花！"
+    if plant.is_breeding_sprout:
+        return "浇满水开花后揭晓颜色"
+    return plant.display_name
+
+
+func _find_empty_plot() -> int:
+    for i in range(GameState.garden_plots.size()):
+        if GameState.garden_plots[i] == null:
+            return i
+    return -1
 
 
 func _input(event: InputEvent) -> void:
     # 任何弹窗打开时忽略右键操作
     if (seed_menu != null and seed_menu.visible) or (flower_action_menu != null and flower_action_menu.visible):
         return
-    # 右键移除植物
+
     if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
+        if _mode == Mode.BREEDING_SELECT:
+            _exit_breeding_mode()
+            get_viewport().set_input_as_handled()
+            return
+        # 右键移除植物
         var clicked_plot := _get_plot_at_position(event.global_position)
         if clicked_plot >= 0:
             var plant: Plant = GameState.get_plant(clicked_plot)
@@ -118,6 +217,11 @@ func _input(event: InputEvent) -> void:
                 GameState.remove_plant(clicked_plot)
                 _refresh_plot(clicked_plot)
                 _update_info()
+
+    if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+        if _mode == Mode.BREEDING_SELECT:
+            _exit_breeding_mode()
+            get_viewport().set_input_as_handled()
 
 
 func _get_plot_at_position(global_pos: Vector2) -> int:
@@ -140,7 +244,6 @@ func _on_send_to_desktop(plot_index: int) -> void:
     var plant: Plant = GameState.get_plant(plot_index)
     if plant == null:
         return
-    # 找第一个空的桌面槽位
     var slot_index := -1
     for i in range(GameState.desktop_slots.size()):
         if GameState.desktop_slots[i] == null:
@@ -150,9 +253,12 @@ func _on_send_to_desktop(plot_index: int) -> void:
         GameState.set_desktop_slot(slot_index, plot_index)
         info_label.text = "%s 已摆到桌面 ✅" % plant.display_name
     else:
-        # 所有槽位都有花，替换第一个
         GameState.set_desktop_slot(0, plot_index)
         info_label.text = "桌面已满，%s 替换了第1位" % plant.display_name
+
+
+func _on_start_breeding(plot_index: int) -> void:
+    _enter_breeding_mode(plot_index)
 
 
 func _on_action_remove_plant(plot_index: int) -> void:
@@ -162,7 +268,7 @@ func _on_action_remove_plant(plot_index: int) -> void:
 
 
 func _on_action_menu_cancelled() -> void:
-    pass  # 菜单已自行关闭
+    pass
 
 
 ## === 信号回调 ===
@@ -170,7 +276,6 @@ func _on_action_menu_cancelled() -> void:
 func _on_seed_selected(plant_type: String) -> void:
     if _selected_plot >= 0:
         GameState.plant_seed(_selected_plot, plant_type)
-        # 信号回调自动刷新格子，这里只更新信息栏
         _update_info()
         _selected_plot = -1
 
@@ -196,7 +301,10 @@ func _on_stage_advanced(plot_index: int, _new_stage: int) -> void:
     _update_info()
 
 
-func _on_flower_discovered(_plant_type: String) -> void:
+func _on_flower_discovered(plant_type: String) -> void:
+    var data := PlantData.get_data(plant_type)
+    var name := data.get("name", plant_type)
+    info_label.text = "🎉 新发现：%s！已加入种子库和图鉴" % name
     _update_info()
 
 
@@ -209,5 +317,4 @@ func _on_game_loaded() -> void:
 
 
 func _on_encyclopedia_pressed() -> void:
-    # TODO: P4 图鉴界面
     info_label.text = "图鉴功能开发中..."
