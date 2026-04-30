@@ -21,6 +21,7 @@ EventBus="*res://scripts/autoload/event_bus.gd"
 GameState="*res://scripts/autoload/game_state.gd"
 GeneSystem="*res://scripts/autoload/gene_system.gd"
 SaveManager="*res://scripts/autoload/save_manager.gd"
+SFXPlayer="*res://scripts/autoload/sfx_player.gd"
 
 [display]
 

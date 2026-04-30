@@ -177,7 +177,11 @@ func _check_discovery(plant: Plant) -> void:
 
 func _check_garden_expansion() -> void:
 	var collected := encyclopedia.size()
-	var threshold := ((garden_size - 6) / EXPAND_AMOUNT + 1) * EXPAND_TRIGGER + EXPAND_TRIGGER
+	# 首次: 6格时需5个发现 → 扩展到9格
+	# 二次: 9格时需10个发现 → 扩展到12格
+	# 三次: 12格时需15个发现 → 扩展到15格
+	# 上限: 15格（MAX=20但实际到15格）
+	var threshold := ((garden_size - 6) / EXPAND_AMOUNT) * EXPAND_TRIGGER
 	if collected >= threshold and garden_size < MAX_GARDEN_SIZE:
 		garden_size = mini(garden_size + EXPAND_AMOUNT, MAX_GARDEN_SIZE)
 		garden_plots.resize(garden_size)
