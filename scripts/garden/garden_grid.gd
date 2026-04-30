@@ -203,14 +203,27 @@ func _find_empty_plot() -> int:
 
 
 func _input(event: InputEvent) -> void:
-    # 任何弹窗打开时忽略右键操作
-    var any_menu_open := (seed_menu != null and seed_menu.visible) \
-        or (flower_action_menu != null and flower_action_menu.visible) \
-        or (encyclopedia != null and encyclopedia.visible)
-    if any_menu_open:
-        return
-
+	# 任何弹窗打开时忽略右键操作
+	var any_menu_open := (seed_menu != null and seed_menu.visible) \
+		or (flower_action_menu != null and flower_action_menu.visible) \
+		or (encyclopedia != null and encyclopedia.visible)
+	if any_menu_open:
+		return
+	# 右键移除植物
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
+		if _mode == Mode.BREEDING_SELECT:
+			_exit_breeding_mode()
+			get_viewport().set_input_as_handled()
+			return
+		var clicked_plot := _get_plot_at_position(event.global_position)
+		if clicked_plot >= 0:
+			var plant: Plant = GameState.get_plant(clicked_plot)
+			if plant != null:
+				GameState.remove_plant(clicked_plot)
+				_refresh_plot(clicked_plot)
+				_update_info()
+	# ESC取消培育
+	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
 		if _mode == Mode.BREEDING_SELECT:
 			_exit_breeding_mode()
 			get_viewport().set_input_as_handled()
