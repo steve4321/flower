@@ -10,12 +10,13 @@
 
 | 阶段 | 内容 | 依赖资源 |
 |-----|------|---------|
-| P0 | 项目骨架 + 核心数据 | 无 |
-| P1 | 花圃场景 + 浇水生长 | 3种初始花精灵(5阶段) |
-| P2 | 桌面展示 + idle动画 | 桌面UI素材 |
-| P3 | 培育系统 | 培育特效 |
-| P4 | 图鉴系统 | 剪影素材 |
-| P5 | 音效 + 存档 + 润色 | 音效素材 |
+| P0 | 项目骨架 + 核心数据 | 无 | ✅ |
+| P1 | 花圃场景 + 浇水生长 | 3种初始花精灵(5阶段) | ✅ |
+| P2 | 桌面展示 + idle动画 | 桌面UI素材 | ✅ |
+| P3 | 培育系统 | 培育特效 | ✅ |
+| P4 | 图鉴系统 | 剪影素材 | ✅ |
+| P5 | 音效 + 存档 + 润色 | 音效素材 | ✅ |
+| P6 | 花仓库 + 培育室 + 桌面花瓶重构 | 无 | ✅ |
 
 ---
 
@@ -26,15 +27,15 @@
 
 ### 任务清单
 
-- [ ] 创建 `project.godot`，配置窗口、输入映射
-- [ ] 创建目录结构：`assets/`, `scenes/`, `scripts/`
-- [ ] 实现 `scripts/core/plant.gd` — Plant 数据类（stage, color, water_count）
-- [ ] 实现 `scripts/core/plant_data.gd` — 植物数据库（3种初始花 + 扩展用结构）
-- [ ] 实现 `scripts/autoload/game_state.gd` — 全局状态（garden plots, desktop slots, seeds, encyclopedia）
-- [ ] 实现 `scripts/autoload/save_manager.gd` — JSON 存档读写
-- [ ] 实现 `scripts/autoload/event_bus.gd` — 信号总线
-- [ ] 创建 `scenes/garden.tscn` 空场景（后续填充）
-- [ ] 创建 `scenes/desktop.tscn` 空场景（后续填充）
+- [x] 创建 `project.godot`，配置窗口、输入映射
+- [x] 创建目录结构：`assets/`, `scenes/`, `scripts/`
+- [x] 实现 `scripts/core/plant.gd` — Plant 数据类（stage, color, water_count）
+- [x] 实现 `scripts/core/plant_data.gd` — 植物数据库（3种初始花 + 扩展用结构）
+- [x] 实现 `scripts/autoload/game_state.gd` — 全局状态（garden plots, desktop slots, seeds, encyclopedia）
+- [x] 实现 `scripts/autoload/save_manager.gd` — JSON 存档读写
+- [x] 实现 `scripts/autoload/event_bus.gd` — 信号总线
+- [x] 创建 `scenes/garden.tscn` 空场景（后续填充）
+- [x] 创建 `scenes/desktop.tscn` 空场景（后续填充）
 
 ### 产出文件
 ```
@@ -60,15 +61,15 @@ scenes/desktop.tscn
 
 ### 任务清单
 
-- [ ] 实现 `scripts/garden/garden_grid.gd` — 花圃网格（6格，种植/浇水/移除）
-- [ ] 实现 `scripts/garden/garden_plot.gd` — 单个格子（显示植物、点击交互）
-- [ ] 实现 `scenes/ui/garden_plot.tscn` — 格子场景（植物sprite + 点击区域）
-- [ ] 组装 `scenes/garden.tscn` — 花圃主场景（grid + 背景 + 种植菜单）
-- [ ] 实现浇水交互：点击花 → water_count++ → 检查阶段推进 → 更新sprite
-- [ ] 实现阶段视觉：根据 stage 切换 sprite（种子/发芽/幼苗/成株/开花）
-- [ ] 实现种植流程：点空格 → 弹出种子选择 → 种下 → 显示种子sprite
-- [ ] 实现颜色显示：根据 plant.color 的 RGB 值设置 sprite modulate
-- [ ] 实现花圃背景（泥土、围栏装饰）
+- [x] 实现 `scripts/garden/garden_grid.gd` — 花圃网格（6格，种植/浇水/移除）
+- [x] 实现 `scripts/garden/garden_plot.gd` — 单个格子（显示植物、点击交互）
+- [x] 实现 `scenes/ui/garden_plot.tscn` — 格子场景（植物sprite + 点击区域）
+- [x] 组装 `scenes/garden.tscn` — 花圃主场景（grid + 背景 + 种植菜单）
+- [x] 实现浇水交互：点击花 → water_count++ → 检查阶段推进 → 更新sprite
+- [x] 实现阶段视觉：根据 stage 切换 sprite（种子/发芽/幼苗/成株/开花）
+- [x] 实现种植流程：点空格 → 弹出种子选择 → 种下 → 显示种子sprite
+- [x] 实现颜色显示：根据 plant.color 的 RGB 值设置 sprite modulate
+- [x] 实现花圃背景（泥土、围栏装饰）
 
 ### 核心逻辑
 
@@ -114,14 +115,14 @@ scenes/desktop.tscn
 
 ### 任务清单
 
-- [ ] 实现 `scripts/desktop/desktop_display.gd` — 桌面窗口管理（位置、透明、置顶）
-- [ ] 实现 `scripts/desktop/idle_animator.gd` — idle动画系统（按植物类型区分）
-- [ ] 组装 `scenes/desktop.tscn` — 桌面场景（5个展示位 + 背景）
-- [ ] 实现花园→桌面操作：在花圃里点花 → "摆到桌面" → 选择桌面位置
-- [ ] 实现桌面→花园操作：点桌面上的花 → "收回花园"
-- [ ] 实现点击桌面花 → 打开花圃窗口
-- [ ] 实现关闭花圃 → 回到桌面展示
-- [ ] 实现 idle 动画参数表（向日葵转头、樱花飘瓣、多肉静止等）
+- [x] 实现 `scripts/desktop/desktop_display.gd` — 桌面窗口管理（位置、透明、置顶）
+- [x] 实现 `scripts/desktop/idle_animator.gd` — idle动画系统（按植物类型区分）
+- [x] 组装 `scenes/desktop.tscn` — 桌面场景（5个展示位 + 背景）
+- [x] 实现花园→桌面操作：在花圃里点花 → "摆到桌面" → 选择桌面位置
+- [x] 实现桌面→花园操作：点桌面上的花 → "收回花园"
+- [x] 实现点击桌面花 → 打开花圃窗口
+- [x] 实现关闭花圃 → 回到桌面展示
+- [x] 实现 idle 动画参数表（向日葵转头、樱花飘瓣、多肉静止等）
 
 ### 核心逻辑
 
@@ -161,18 +162,18 @@ scenes/desktop.tscn
 
 ### 任务清单
 
-- [ ] 实现 `scripts/autoload/gene_system.gd` — 颜色混合 + 稀有检测
-- [ ] 实现 `scripts/garden/breeding.gd` — 培育流程控制
-- [ ] 实现培育入口：点开花花 → "培育" → 进入选择模式 → 点另一朵花
-- [ ] 实现培育芽苗：两朵花中间生成新芽苗（占用一个空格）
-- [ ] 实现芽苗生长：浇水几次后开花揭晓结果
-- [ ] 实现三层结果逻辑：
+- [x] 实现 `scripts/autoload/gene_system.gd` — 颜色混合 + 稀有检测
+- [x] 实现 `scripts/garden/breeding.gd` — 培育流程控制
+- [x] 实现培育入口：点开花花 → "培育" → 进入选择模式 → 点另一朵花
+- [x] 实现培育芽苗：两朵花中间生成新芽苗（占用一个空格）
+- [x] 实现芽苗生长：浇水几次后开花揭晓结果
+- [x] 实现三层结果逻辑：
   - 同品种混色（RGB 插值 + 随机偏移）
   - 跨品种杂交（查杂交表生成新品种）
   - 稀有花（极小概率触发）
-- [ ] 实现开花揭晓动画（花瓣展开 + 颜色渐变显示）
-- [ ] 实现稀有花特效（全屏花瓣飘落 + 发光）
-- [ ] 实现"新发现"判定 + 通知
+- [x] 实现开花揭晓动画（花瓣展开 + 颜色渐变显示）
+- [x] 实现稀有花特效（全屏花瓣飘落 + 发光）
+- [x] 实现"新发现"判定 + 通知
 
 ### 核心逻辑
 
@@ -229,13 +230,13 @@ scenes/desktop.tscn
 
 ### 任务清单
 
-- [ ] 实现 `scripts/ui/encyclopedia.gd` — 图鉴逻辑
-- [ ] 组装 `scenes/ui/encyclopedia.tscn` — 图鉴场景（网格 + 详情面板）
-- [ ] 实现已发现花展示：正常彩色 sprite + 名称
-- [ ] 实现未发现花展示：剪影/轮廓（不显示名称）
-- [ ] 实现分类筛选：全部 / 花卉 / 多肉 / 稀有
-- [ ] 实现新发现动画：花瓣飘落 + 名字浮出
-- [ ] 实现进度统计：已收集 X/Y
+- [x] 实现 `scripts/ui/encyclopedia.gd` — 图鉴逻辑
+- [x] 组装 `scenes/ui/encyclopedia.tscn` — 图鉴场景（网格 + 详情面板）
+- [x] 实现已发现花展示：正常彩色 sprite + 名称
+- [x] 实现未发现花展示：剪影/轮廓（不显示名称）
+- [x] 实现分类筛选：全部 / 花卉 / 多肉 / 稀有
+- [x] 实现新发现动画：花瓣飘落 + 名字浮出
+- [x] 实现进度统计：已收集 X/Y
 
 ### 依赖资源
 
@@ -256,18 +257,18 @@ scenes/desktop.tscn
 
 ### 任务清单
 
-- [ ] 实现自动存档（每次操作后保存）
-- [ ] 实现启动时读档（有存档则加载，无则新游戏）
-- [ ] 添加浇水音效
-- [ ] 添加开花音效
-- [ ] 添加培育配对音效
-- [ ] 添加稀有花出现音效
-- [ ] 添加新发现收录音效
-- [ ] 添加花圃背景音乐（可选开关）
-- [ ] 实现花圃扩展机制（收集达到一定数量解锁新格子）
-- [ ] 添加更多植物品种的精灵（超过3种初始花）
-- [ ] 添加多肉植物品种
-- [ ] 测试 + 修复 + 数值调优
+- [x] 实现自动存档（每次操作后保存）
+- [x] 实现启动时读档（有存档则加载，无则新游戏）
+- [x] 添加浇水音效
+- [x] 添加开花音效
+- [x] 添加培育配对音效
+- [x] 添加稀有花出现音效
+- [x] 添加新发现收录音效
+- [x] 添加花圃背景音乐（可选开关）
+- [x] 实现花圃扩展机制（收集达到一定数量解锁新格子）
+- [x] 添加更多植物品种的精灵（超过3种初始花）
+- [x] 添加多肉植物品种
+- [x] 测试 + 修复 + 数值调优
 
 ### 依赖资源
 
@@ -282,6 +283,45 @@ scenes/desktop.tscn
 | 更多花精灵（11种花卉） | 每种5阶段 PNG | 55张 | 开花阶段最重要 |
 | 更多花精灵（5种多肉） | 每种5阶段 PNG | 25张 | 多肉变化较少 |
 | 5种稀有花开花精灵 | 每种5阶段 PNG | 25张 | 带特殊效果 |
+
+---
+
+## P6 - 花仓库 + 培育室 + 桌面花瓶重构
+
+### 目标
+新增花仓库系统、独立培育室场景、桌面改为单花瓶多花插花。
+
+### 任务清单
+
+- [x] 实现 `game_state.gd` 新增 `flower_storage` 和 `vase_flower_ids`
+- [x] 新建 `breeding_room.tscn` + `breeding_room.gd` — 独立培育室场景
+- [x] 新建 `flower_arrange.tscn` + `flower_arrange.gd` — 插花选择弹窗
+- [x] 新建 `flower_picker.tscn` + `flower_picker.gd` — 仓库选花弹窗
+- [x] 修改 `desktop.tscn` — 3槽位改为单花瓶+多花展示
+- [x] 修改 `desktop_display.gd` — 花瓶插花逻辑
+- [x] 修改 `garden_grid.gd` — 去掉花园内培育模式，添加仓库按钮
+- [x] 修改 `flower_action_menu` — 去掉桌面按钮，新增仓库按钮
+- [x] 修改 `event_bus.gd` — 新增 `flower_stored`/`breeding_done` 等信号
+- [x] 修改 `save_manager.gd` — 序列化新增字段
+
+### 核心逻辑
+
+```
+花仓库:
+  开花的花 → 收入仓库（不消耗）
+  仓库里的花 → 可用于培育
+  仓库里的花 → 可取出放回花圃
+
+培育室:
+  独立场景，不占用花圃格子
+  从仓库选两朵花 → 培育 → 直接获得新种子
+  花不消耗，可反复培育
+
+桌面花瓶:
+  单花瓶，可插多朵花
+  花不消耗，还在花圃里
+  每朵花有独特摇曳动画
+```
 
 ---
 
