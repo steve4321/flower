@@ -34,3 +34,4 @@ func _input(event: InputEvent) -> void:
         if not panel_rect.has_point(event.global_position):
             cancelled.emit()
             hide()
+            get_viewport().set_input_as_handled()  # 阻止事件继续传播（防止右键误删植物）

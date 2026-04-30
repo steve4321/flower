@@ -4,8 +4,8 @@ extends Control
 const SLOT_SCENE: PackedScene = preload("res://scenes/ui/desktop_slot.tscn")
 const IDLE_SCRIPT: GDScript = preload("res://scripts/desktop/idle_animator.gd")
 
-@onready var slot_container: HBoxContainer = $Bar/SlotContainer
-@onready var garden_btn: Button = $Bar/GardenButton
+@onready var slot_container: HBoxContainer = $VBox/Bar/SlotContainer
+@onready var garden_btn: Button = $VBox/Bar/GardenButton
 
 var slot_nodes: Array[PanelContainer] = []
 var idle_nodes: Array[Node] = []
