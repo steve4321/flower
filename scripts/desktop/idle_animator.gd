@@ -77,7 +77,7 @@ func stop() -> void:
         _target.rotation = _original_rotation
         _target.scale = _original_scale
         _target.position = _original_position
-	set_process(false)
+    set_process(false)
 
 
 func _process(delta: float) -> void:
